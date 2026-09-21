@@ -1,5 +1,6 @@
 import { gameStore } from '../data/store.js';
 import { resolveBattle } from './combatService.js';
+import { createMessage } from './messageService.js';
 import type { Planet } from '../types.js';
 
 export interface MissionArrivalResult {
@@ -46,6 +47,14 @@ export function processArrivedMissions(playerId: string): MissionArrivalResult[]
       };
       const index = gameStore.planets.findIndex((planet) => planet.id === targetPlanet.id);
       gameStore.planets[index] = updatedTarget;
+
+      createMessage(
+        playerId,
+        'mission',
+        'Transporte entregado',
+        `La flota ha entregado ${loot.metal} metal, ${loot.crystal} cristal y ${loot.deuterium} deuterio en ${targetPlanet.name}.`,
+        { missionId: mission.id, loot },
+      );
 
       results.push({ missionId: mission.id, missionType: mission.missionType, outcome: 'delivered', loot });
       continue;
@@ -94,6 +103,17 @@ export function processArrivedMissions(playerId: string): MissionArrivalResult[]
       };
 
       const battle = resolveBattle(attackerFleet, defenderFleet);
+
+      const won = battle.battleSummary.winner === 'attacker';
+      createMessage(
+        playerId,
+        'battle',
+        won ? 'Victoria en combate' : 'Derrota en combate',
+        won
+          ? `Tu flota ha vencido en ${targetPlanet.name}. Saqueo: ${battle.debris.metal} metal, ${battle.debris.crystal} cristal.`
+          : `Tu flota ha sido destruida en ${targetPlanet.name}.`,
+        { missionId: mission.id, battle: battle.battleSummary },
+      );
 
       // If attacker wins, loot a portion of the target's resources.
       let loot;

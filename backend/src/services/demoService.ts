@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { gameStore } from '../data/store.js';
 import { getActiveQueueItems, processCompletedBuildings } from './buildQueueService.js';
 import { processArrivedMissions } from './missionService.js';
+import { getUnreadCount } from './messageService.js';
 import type { Planet, ResourceState } from '../types.js';
 
 const buildingCosts: Record<string, ResourceState> = {
@@ -274,6 +275,7 @@ export function getPlayerDashboardState(playerId: string) {
       total: totalDefenses,
       items: defenseSummary,
     },
+    unreadMessages: getUnreadCount(playerId),
     economy: {
       totalResources: snapshot.summary.totalResources,
       totalProduction: snapshot.summary.totalProduction,
