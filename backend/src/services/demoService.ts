@@ -213,6 +213,18 @@ export function getPlayerDashboardState(playerId: string) {
     (building) => building.planetId === snapshot.planet.id,
   );
 
+  const now = Date.now();
+  const activeMissions = gameStore.missions
+    .filter((mission) => mission.ownerId === playerId && mission.status === 'in_transit')
+    .map((mission) => ({
+      id: mission.id,
+      missionType: mission.missionType,
+      quantity: mission.quantity,
+      targetPlanetId: mission.targetPlanetId,
+      secondsRemaining: Math.max(0, Math.round((new Date(mission.arrivesAt).getTime() - now) / 1000)),
+      arrivesAt: mission.arrivesAt,
+    }));
+
   return {
     player: snapshot.player,
     planet: snapshot.planet,
@@ -226,6 +238,7 @@ export function getPlayerDashboardState(playerId: string) {
       type: building.type,
       level: building.level,
     })),
+    activeMissions,
     economy: {
       totalResources: snapshot.summary.totalResources,
       totalProduction: snapshot.summary.totalProduction,

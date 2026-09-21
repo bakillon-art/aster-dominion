@@ -18,11 +18,24 @@ export interface StoredBuilding {
   level: number;
 }
 
+export interface StoredMission {
+  id: string;
+  ownerId: string;
+  originPlanetId: string;
+  targetPlanetId: string;
+  missionType: string;
+  quantity: number;
+  status: 'in_transit' | 'arrived' | 'returning';
+  launchedAt: string;
+  arrivesAt: string;
+}
+
 export const gameStore = {
   players: [] as Player[],
   planets: [] as Planet[],
   fleets: [] as StoredFleet[],
   buildings: [] as StoredBuilding[],
+  missions: [] as StoredMission[],
 };
 
 const defaultPlayerId = randomUUID();

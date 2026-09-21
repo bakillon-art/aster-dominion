@@ -3,8 +3,10 @@ import express from 'express';
 
 import { authRouter } from './routes/auth.js';
 import { combatRouter } from './routes/combat.js';
+import { defenseRouter } from './routes/defense.js';
 import { demoRouter } from './routes/demo.js';
 import { fleetRouter } from './routes/fleet.js';
+import { galaxyRouter } from './routes/galaxy.js';
 import { healthRouter } from './routes/health.js';
 import { playerRouter } from './routes/player.js';
 import { researchRouter } from './routes/research.js';
@@ -26,6 +28,8 @@ export function createApp() {
   app.use('/fleets', fleetRouter);
   app.use('/combat', combatRouter);
   app.use('/research', researchRouter);
+  app.use('/defenses', defenseRouter);
+  app.use('/galaxy', galaxyRouter);
 
   return app;
 }

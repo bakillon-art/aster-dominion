@@ -49,6 +49,18 @@ fleetRouter.post('/launch', (req, res) => {
     const index = gameStore.planets.findIndex((planet) => planet.id === originPlanet.id);
     gameStore.planets[index] = result.updatedPlanet;
 
+    gameStore.missions.push({
+      id: result.mission.id,
+      ownerId: playerId,
+      originPlanetId: originPlanet.id,
+      targetPlanetId: targetPlanet.id,
+      missionType,
+      quantity: result.mission.quantity,
+      status: 'in_transit',
+      launchedAt: result.mission.launchedAt,
+      arrivesAt: result.mission.arrivesAt,
+    });
+
     res.json({ mission: result.mission, planet: result.updatedPlanet });
   } catch (error) {
     res.status(400).json({ error: error instanceof Error ? error.message : 'fleet launch failed' });
