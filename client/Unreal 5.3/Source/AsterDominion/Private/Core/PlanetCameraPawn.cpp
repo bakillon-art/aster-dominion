@@ -39,22 +39,19 @@ void APlanetCameraPawn::Tick(float DeltaSeconds)
         const bool bLeftDown = PC->IsInputKeyDown(EKeys::LeftMouseButton);
         const bool bAnyDrag = bRightDown || bLeftDown;
 
-        float MouseX = 0.0f;
-        float MouseY = 0.0f;
-        PC->GetMousePosition(MouseX, MouseY);
-        const FVector2D CurrentMouse(MouseX, MouseY);
-
         if (bAnyDrag)
         {
-            if (bDragging)
+            // Use analog input axes (work regardless of cursor lock state).
+            const float DeltaX = PC->GetInputAnalogKeyState(EKeys::MouseX);
+            const float DeltaY = PC->GetInputAnalogKeyState(EKeys::MouseY);
+
+            if (!FMath::IsNearlyZero(DeltaX) || !FMath::IsNearlyZero(DeltaY))
             {
-                const FVector2D Delta = CurrentMouse - LastMousePos;
-                Yaw -= Delta.X * MouseSensitivity;
-                Pitch = FMath::Clamp(Pitch + Delta.Y * MouseSensitivity, -80.0f, 85.0f);
+                Yaw += DeltaX * MouseSensitivity * 2.0f;
+                Pitch = FMath::Clamp(Pitch - DeltaY * MouseSensitivity * 2.0f, -80.0f, 85.0f);
                 bAutoOrbit = false;
             }
             bDragging = true;
-            LastMousePos = CurrentMouse;
         }
         else
         {

@@ -55,16 +55,16 @@ void ASolarSystemActor::SpawnSun()
             SunMat->SetVectorParameterValue(TEXT("Color"), FLinearColor(1.0f, 0.85f, 0.4f, 1.0f));
         }
     }
-    SunMesh->SetWorldScale3D(FVector(1.5f));
+    SunMesh->SetWorldScale3D(FVector(2.4f));
     SunMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     SunMesh->SetCastShadow(false);
 
     SunLight = NewObject<UPointLightComponent>(this, TEXT("SunLight"));
     SunLight->RegisterComponent();
     SunLight->AttachToComponent(SunMesh, FAttachmentTransformRules::KeepRelativeTransform);
-    SunLight->SetIntensity(50000.0f);
+    SunLight->SetIntensity(300000.0f);
     SunLight->SetLightColor(FColor(255, 240, 210));
-    SunLight->SetAttenuationRadius(20000.0f);
+    SunLight->SetAttenuationRadius(60000.0f);
 }
 
 void ASolarSystemActor::SpawnPlanets()
