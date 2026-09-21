@@ -150,6 +150,82 @@ void AAsterDominionHUD::DrawHUD()
         return;
     }
 
+    DrawResourceBar();
+    DrawStatusPanel();
+}
+
+void AAsterDominionHUD::DrawResourceBar()
+{
+    const float ViewportWidth = Canvas->ClipX;
+    const float BarHeight = 46.0f;
+    const float BarWidth = 560.0f;
+    const float BarX = ViewportWidth - BarWidth - 24.0f;
+    const float BarY = 24.0f;
+
+    // Bar background
+    Canvas->K2_DrawBox(FVector2D(BarX, BarY), FVector2D(BarWidth, BarHeight), 0.0f, FLinearColor(0.01f, 0.02f, 0.045f, 0.9f));
+    Canvas->K2_DrawBox(FVector2D(BarX, BarY), FVector2D(BarWidth, 2.0f), 0.0f, FLinearColor(0.28f, 0.78f, 1.0f, 1.0f));
+
+    if (!bHasDashboardData)
+    {
+        return;
+    }
+
+    auto FormatNumber = [](int32 Value) -> FString
+    {
+        FString Digits = FString::FromInt(Value);
+        FString Out;
+        int32 Count = 0;
+        for (int32 i = Digits.Len() - 1; i >= 0; --i)
+        {
+            Out.InsertAt(0, Digits[i]);
+            if (++Count % 3 == 0 && i > 0)
+            {
+                Out.InsertAt(0, TEXT("."));
+            }
+        }
+        return Out;
+    };
+
+    struct FResourceEntry
+    {
+        int32 Value;
+        FLinearColor Color;
+    };
+
+    const FResourceEntry Entries[] = {
+        { CurrentDashboard.Resources.Metal, FLinearColor(0.75f, 0.75f, 0.78f) },
+        { CurrentDashboard.Resources.Crystal, FLinearColor(0.4f, 0.8f, 1.0f) },
+        { CurrentDashboard.Resources.Deuterium, FLinearColor(0.4f, 1.0f, 0.59f) },
+        { CurrentDashboard.Resources.Energy, FLinearColor(1.0f, 0.84f, 0.31f) },
+    };
+
+    UFont* Font = GEngine->GetMediumFont();
+    const float SlotWidth = BarWidth / 4.0f;
+
+    for (int32 i = 0; i < 4; ++i)
+    {
+        const float SlotX = BarX + i * SlotWidth;
+        const float IconSize = 26.0f;
+        const float IconX = SlotX + 10.0f;
+        const float IconY = BarY + (BarHeight - IconSize) * 0.5f;
+
+        // Icon: rounded square with the resource color.
+        Canvas->K2_DrawBox(FVector2D(IconX, IconY), FVector2D(IconSize, IconSize), 4.0f, Entries[i].Color);
+        Canvas->K2_DrawBox(FVector2D(IconX + 3.0f, IconY + 3.0f), FVector2D(IconSize - 6.0f, IconSize - 6.0f), 2.0f,
+            FLinearColor(Entries[i].Color.R * 0.5f, Entries[i].Color.G * 0.5f, Entries[i].Color.B * 0.5f, 1.0f));
+
+        // Value text next to the icon.
+        FCanvasTextItem TextItem(
+            FVector2D(IconX + IconSize + 8.0f, BarY + (BarHeight - 16.0f) * 0.5f),
+            FText::FromString(FormatNumber(Entries[i].Value)), Font, FColor::White);
+        TextItem.EnableShadow(FLinearColor::Black);
+        Canvas->DrawItem(TextItem);
+    }
+}
+
+void AAsterDominionHUD::DrawStatusPanel()
+{
     const float X = 24.0f;
     const float Y = 24.0f;
     const float PanelWidth = 330.0f;

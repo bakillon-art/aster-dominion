@@ -52,4 +52,6 @@ private:
     void SendAction(const FString& Endpoint, const FString& JsonBody);
     void RefreshDashboard();
     void SyncProductionAndRefresh();
+    void DrawResourceBar();
+    void DrawStatusPanel();
 };
