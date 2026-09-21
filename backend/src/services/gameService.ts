@@ -2,6 +2,9 @@ import type { OfflineProductionResult, Planet, ResourceState } from '../types.js
 
 const resourceKeys: Array<keyof ResourceState> = ['metal', 'crystal', 'deuterium', 'energy'];
 
+// Fractional production that has not yet materialized into whole units.
+const productionRemainders = new Map<string, ResourceState>();
+
 export function calculateOfflineProduction(
   planet: Planet,
   now: Date = new Date(),
@@ -11,6 +14,14 @@ export function calculateOfflineProduction(
   const elapsedMs = Math.max(0, currentTime - lastUpdated);
   const totalHours = elapsedMs / 3_600_000;
 
+  // Start from any stored fractional remainders so short ticks still add up.
+  const remainder = productionRemainders.get(planet.id) ?? {
+    metal: 0,
+    crystal: 0,
+    deuterium: 0,
+    energy: 0,
+  };
+
   const gained: ResourceState = {
     metal: 0,
     crystal: 0,
@@ -18,10 +29,17 @@ export function calculateOfflineProduction(
     energy: 0,
   };
 
+  const nextRemainder: ResourceState = { ...remainder };
+
   for (const key of resourceKeys) {
     const productionValue = planet.production[key];
-    gained[key] = Math.floor(totalHours * productionValue);
+    const fractional = totalHours * productionValue + remainder[key];
+    const whole = Math.floor(fractional);
+    gained[key] = whole;
+    nextRemainder[key] = fractional - whole;
   }
+
+  productionRemainders.set(planet.id, nextRemainder);
 
   const updatedResources: ResourceState = {
     metal: planet.resources.metal + gained.metal,
