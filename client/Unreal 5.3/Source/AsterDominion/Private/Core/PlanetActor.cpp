@@ -2,6 +2,7 @@
 
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/MaterialInterface.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/StaticMesh.h"
 #include "GameFramework/Actor.h"
@@ -23,6 +24,13 @@ APlanetActor::APlanetActor()
         PlanetMesh->SetStaticMesh(SphereMesh.Object);
     }
 
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> ShapeMat(
+        TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+    if (ShapeMat.Succeeded())
+    {
+        PlanetMesh->SetMaterial(0, ShapeMat.Object);
+    }
+
     PlanetMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     PlanetMesh->SetSimulatePhysics(false);
     PlanetMesh->SetWorldScale3D(FVector(2.0f, 2.0f, 2.0f));
@@ -38,14 +46,8 @@ void APlanetActor::BeginPlay()
         UMaterialInstanceDynamic* DynMat = PlanetMesh->CreateAndSetMaterialInstanceDynamic(0);
         if (DynMat)
         {
-            // Force a readable ocean-blue planet regardless of the base material's parameter names.
-            const FLinearColor OceanBlue(0.12f, 0.35f, 0.75f, 1.0f);
-            DynMat->SetVectorParameterValue(TEXT("BaseColor"), OceanBlue);
-            DynMat->SetVectorParameterValue(TEXT("Color"), OceanBlue);
-            DynMat->SetVectorParameterValue(TEXT("Base Color"), OceanBlue);
-            DynMat->SetScalarParameterValue(TEXT("Roughness"), 0.5f);
-            DynMat->SetScalarParameterValue(TEXT("Metallic"), 0.0f);
-            DynMat->SetScalarParameterValue(TEXT("Specular"), 0.3f);
+            // BasicShapeMaterial exposes a "Color" parameter.
+            DynMat->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.1f, 0.4f, 0.9f, 1.0f));
         }
     }
 }

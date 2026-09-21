@@ -136,7 +136,8 @@ void AAsterDominionHUD::DrawHUD()
 
     const float X = 40.0f;
     float Y = 40.0f;
-    const float LineHeight = 44.0f;
+    const float LineHeight = 52.0f;
+    const float Scale = 1.6f;
     const FLinearColor TextColor(1.0f, 1.0f, 1.0f, 1.0f);
     const FLinearColor TitleColor(0.3f, 0.85f, 1.0f, 1.0f);
 
@@ -147,6 +148,7 @@ void AAsterDominionHUD::DrawHUD()
         Canvas->SetDrawColor(Color.ToFColor(true));
         FCanvasTextItem TextItem(FVector2D(X, Y), FText::FromString(Text), Font, FLinearColor::Black);
         TextItem.EnableShadow(FLinearColor::Black);
+        TextItem.Scale = FVector2D(Scale, Scale);
         Canvas->DrawItem(TextItem);
         Y += LineHeight;
     };
