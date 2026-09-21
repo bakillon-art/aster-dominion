@@ -34,6 +34,23 @@ APlanetActor::APlanetActor()
     PlanetMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     PlanetMesh->SetSimulatePhysics(false);
     PlanetMesh->SetWorldScale3D(FVector(2.0f, 2.0f, 2.0f));
+
+    // Decorative ring around the planet.
+    RingMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RingMesh"));
+    RingMesh->SetupAttachment(PlanetMesh);
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> CylinderMesh(
+        TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
+    if (CylinderMesh.Succeeded())
+    {
+        RingMesh->SetStaticMesh(CylinderMesh.Object);
+    }
+    if (ShapeMat.Succeeded())
+    {
+        RingMesh->SetMaterial(0, ShapeMat.Object);
+    }
+    RingMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    RingMesh->SetRelativeScale3D(FVector(1.9f, 1.9f, 0.04f));
+    RingMesh->SetRelativeRotation(FRotator(20.0f, 0.0f, 0.0f));
 }
 
 void APlanetActor::BeginPlay()
@@ -48,6 +65,15 @@ void APlanetActor::BeginPlay()
         {
             // BasicShapeMaterial exposes a "Color" parameter.
             DynMat->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.1f, 0.4f, 0.9f, 1.0f));
+        }
+    }
+
+    if (RingMesh)
+    {
+        UMaterialInstanceDynamic* RingMat = RingMesh->CreateAndSetMaterialInstanceDynamic(0);
+        if (RingMat)
+        {
+            RingMat->SetVectorParameterValue(TEXT("Color"), FLinearColor(0.7f, 0.65f, 0.4f, 1.0f));
         }
     }
 }

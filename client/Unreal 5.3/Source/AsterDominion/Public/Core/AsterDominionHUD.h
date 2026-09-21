@@ -6,6 +6,16 @@
 #include "Systems/PlanetStatusWidget.h"
 #include "AsterDominionHUD.generated.h"
 
+struct FHudButton
+{
+    FString Label;
+    FString Action;
+    FString Param;
+    FVector2D Position;
+    FVector2D Size;
+    FLinearColor Color;
+};
+
 UCLASS()
 class ASTERDOMINION_API AAsterDominionHUD : public AHUD
 {
@@ -31,4 +41,13 @@ public:
 
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AsterDominion")
     bool bHasDashboardData = false;
+
+private:
+    TArray<FHudButton> ActionButtons;
+    bool bButtonsBuilt = false;
+    void BuildActionButtons();
+    void DrawButton(const FHudButton& Button, const FVector2D& MousePos, bool bHovered);
+    void HandleClick(const FVector2D& MousePos);
+    void SendAction(const FString& Endpoint, const FString& JsonBody);
+    void RefreshDashboard();
 };

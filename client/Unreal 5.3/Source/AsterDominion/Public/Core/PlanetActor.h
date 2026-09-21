@@ -21,6 +21,9 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Planet")
     class UStaticMeshComponent* PlanetMesh;
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Planet")
+    class UStaticMeshComponent* RingMesh;
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Planet")
     float RotationSpeed = 12.0f;
 
