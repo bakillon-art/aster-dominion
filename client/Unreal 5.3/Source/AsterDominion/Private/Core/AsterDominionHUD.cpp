@@ -7,6 +7,7 @@
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
+#include "Engine/Texture2D.h"
 #include "HttpModule.h"
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
@@ -191,13 +192,14 @@ void AAsterDominionHUD::DrawResourceBar()
     {
         int32 Value;
         FLinearColor Color;
+        FString IconPath;
     };
 
     const FResourceEntry Entries[] = {
-        { CurrentDashboard.Resources.Metal, FLinearColor(0.75f, 0.75f, 0.78f) },
-        { CurrentDashboard.Resources.Crystal, FLinearColor(0.4f, 0.8f, 1.0f) },
-        { CurrentDashboard.Resources.Deuterium, FLinearColor(0.4f, 1.0f, 0.59f) },
-        { CurrentDashboard.Resources.Energy, FLinearColor(1.0f, 0.84f, 0.31f) },
+        { CurrentDashboard.Resources.Metal, FLinearColor(0.75f, 0.75f, 0.78f), TEXT("/Game/UI/Icons/metal.metal") },
+        { CurrentDashboard.Resources.Crystal, FLinearColor(0.4f, 0.8f, 1.0f), TEXT("/Game/UI/Icons/crystal.crystal") },
+        { CurrentDashboard.Resources.Deuterium, FLinearColor(0.4f, 1.0f, 0.59f), TEXT("/Game/UI/Icons/deuterium.deuterium") },
+        { CurrentDashboard.Resources.Energy, FLinearColor(1.0f, 0.84f, 0.31f), TEXT("/Game/UI/Icons/energy.energy") },
     };
 
     UFont* Font = GEngine->GetMediumFont();
@@ -206,14 +208,23 @@ void AAsterDominionHUD::DrawResourceBar()
     for (int32 i = 0; i < 4; ++i)
     {
         const float SlotX = BarX + i * SlotWidth;
-        const float IconSize = 26.0f;
+        const float IconSize = 28.0f;
         const float IconX = SlotX + 10.0f;
         const float IconY = BarY + (BarHeight - IconSize) * 0.5f;
 
-        // Icon: rounded square with the resource color.
-        Canvas->K2_DrawBox(FVector2D(IconX, IconY), FVector2D(IconSize, IconSize), 4.0f, Entries[i].Color);
-        Canvas->K2_DrawBox(FVector2D(IconX + 3.0f, IconY + 3.0f), FVector2D(IconSize - 6.0f, IconSize - 6.0f), 2.0f,
-            FLinearColor(Entries[i].Color.R * 0.5f, Entries[i].Color.G * 0.5f, Entries[i].Color.B * 0.5f, 1.0f));
+        // Icon texture if it imported; otherwise a colored box.
+        UTexture2D* IconTex = LoadObject<UTexture2D>(nullptr, *Entries[i].IconPath);
+        if (IconTex)
+        {
+            FCanvasTileItem TileItem(FVector2D(IconX, IconY), IconTex->GetResource(),
+                FVector2D(IconSize, IconSize), Entries[i].Color);
+            TileItem.BlendMode = SE_BLEND_Translucent;
+            Canvas->DrawItem(TileItem);
+        }
+        else
+        {
+            Canvas->K2_DrawBox(FVector2D(IconX, IconY), FVector2D(IconSize, IconSize), 4.0f, Entries[i].Color);
+        }
 
         // Value text next to the icon.
         FCanvasTextItem TextItem(
