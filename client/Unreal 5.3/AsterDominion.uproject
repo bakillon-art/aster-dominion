@@ -1,0 +1,22 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{6BA7CD61-40FC-3B6D-F6DE-B6AC8C7856EE}",
+	"Category": "Games",
+	"Description": "Aster Dominion",
+	"Modules": [
+		{
+			"Name": "AsterDominion",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		}
+	]
+}

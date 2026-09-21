@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aster Dominion Demo</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Aster Dominion</p>
+          <h1>Primer demo del imperio</h1>
+        </div>
+
+        <div class="player-controls">
+          <label for="player-id">Player ID</label>
+          <div class="input-row">
+            <input id="player-id" type="text" value="player-demo" />
+            <button id="load-demo" type="button">Cargar</button>
+          </div>
+        </div>
+      </header>
+
+      <main class="dashboard">
+        <section class="panel overview">
+          <div class="card-header">
+            <span class="badge live">ONLINE</span>
+            <span id="phase">first-demo</span>
+          </div>
+
+          <h2 id="planet-name">Aster Prime</h2>
+          <p id="player-name">demo-player</p>
+
+          <div class="stats-grid">
+            <article class="stat-box">
+              <span>Metal</span>
+              <strong id="metal">0</strong>
+            </article>
+            <article class="stat-box">
+              <span>Crystal</span>
+              <strong id="crystal">0</strong>
+            </article>
+            <article class="stat-box">
+              <span>Deuterio</span>
+              <strong id="deuterium">0</strong>
+            </article>
+            <article class="stat-box">
+              <span>Energía</span>
+              <strong id="energy">0</strong>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel production">
+          <h3>Producción</h3>
+          <ul id="production-list">
+            <li><span>Metal</span><strong>0</strong></li>
+            <li><span>Crystal</span><strong>0</strong></li>
+            <li><span>Deuterio</span><strong>0</strong></li>
+            <li><span>Energía</span><strong>0</strong></li>
+          </ul>
+        </section>
+
+        <section class="panel fleet">
+          <h3>Flotas</h3>
+          <div class="fleet-summary">
+            <span>Total</span>
+            <strong id="fleet-total">0</strong>
+          </div>
+          <div id="fleet-types" class="fleet-types"></div>
+        </section>
+      </main>
+
+      <section class="panel table-panel">
+        <h3>Resumen económico</h3>
+        <div class="summary-row">
+          <div>
+            <small>Recursos totales</small>
+            <strong id="total-resources">0</strong>
+          </div>
+          <div>
+            <small>Producción total</small>
+            <strong id="total-production">0</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel actions-panel">
+        <h3>Acciones del imperio</h3>
+
+        <div class="action-row">
+          <label for="building-type">Edificio</label>
+          <select id="building-type">
+            <option value="mineral_extractor">Mineral Extractor</option>
+            <option value="crystal_refinery">Crystal Refinery</option>
+            <option value="deuterium_plant">Deuterium Plant</option>
+            <option value="solar_plant">Solar Plant</option>
+          </select>
+          <button id="build-button" type="button">Construir</button>
+        </div>
+
+        <div class="action-row">
+          <label for="ship-type">Nave</label>
+          <select id="ship-type">
+            <option value="light_cargo">Light Cargo</option>
+            <option value="heavy_cargo">Heavy Cargo</option>
+            <option value="interceptor">Interceptor</option>
+          </select>
+          <label for="fleet-quantity">Cantidad</label>
+          <input id="fleet-quantity" type="number" min="1" value="1" />
+          <button id="fleet-button" type="button">Crear flota</button>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
