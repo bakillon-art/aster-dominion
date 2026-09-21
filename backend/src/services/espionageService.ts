@@ -34,6 +34,7 @@ export function spyOnPlanet(
   targetPlanetId: string,
   probeCount: number,
   espionageLevel: number,
+  defenderEspionageLevel = 0,
 ): EspionageReport {
   const targetPlanet = gameStore.planets.find((planet) => planet.id === targetPlanetId);
 
@@ -45,8 +46,15 @@ export function spyOnPlanet(
     throw new Error('at least one probe is required');
   }
 
-  // Risk: each probe has a base 5% loss chance, reduced by espionage tech (min 1%).
-  const lossChancePerProbe = Math.max(0.01, 0.05 - espionageLevel * 0.005);
+  // Risk model: base 5% per probe, but the defender's espionage level counters it.
+  // Each level the defender has OVER the spy adds +8% loss chance per probe.
+  // Each level the spy has OVER the defender reduces it by 3% (min 1%).
+  const levelDiff = defenderEspionageLevel - espionageLevel;
+  const lossChancePerProbe = Math.min(
+    0.95,
+    Math.max(0.01, 0.05 + Math.max(0, levelDiff) * 0.08 - Math.max(0, -levelDiff) * 0.03),
+  );
+
   let probesLost = 0;
   for (let i = 0; i < probeCount; i++) {
     if (Math.random() < lossChancePerProbe) {

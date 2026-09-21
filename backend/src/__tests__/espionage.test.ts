@@ -76,3 +76,17 @@ test('espionage requires at least one probe', () => {
 
   assert.throws(() => spyOnPlanet('player-spy-5', target.id, 0, 1));
 });
+
+test('defender with higher espionage level destroys far more probes', () => {
+  const target = makePlanet('spy-target-6', 'player-target');
+  gameStore.planets.push(target);
+
+  // Spy level 0 vs defender level 8: loss chance per probe = 5% + 8*8% = 69%.
+  // With 100 probes, we should reliably lose more than 40.
+  const report = spyOnPlanet('player-spy-6', target.id, 100, 0, 8);
+  assert.ok(report.probesLost > 40, `expected many losses, got ${report.probesLost}`);
+
+  // Spy level 8 vs defender level 0: loss chance = 5% - 8*3% clamped to 1%.
+  const report2 = spyOnPlanet('player-spy-7', target.id, 100, 8, 0);
+  assert.ok(report2.probesLost < 20, `expected few losses, got ${report2.probesLost}`);
+});

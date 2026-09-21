@@ -6,11 +6,12 @@ import { spyOnPlanet } from '../services/espionageService.js';
 export const espionageRouter = Router();
 
 espionageRouter.post('/', (req, res) => {
-  const { playerId, targetPlanetId, probeCount, espionageLevel } = req.body as {
+  const { playerId, targetPlanetId, probeCount, espionageLevel, defenderEspionageLevel } = req.body as {
     playerId?: string;
     targetPlanetId?: string;
     probeCount?: number;
     espionageLevel?: number;
+    defenderEspionageLevel?: number;
   };
 
   if (!playerId || !targetPlanetId || typeof probeCount !== 'number') {
@@ -25,7 +26,13 @@ espionageRouter.post('/', (req, res) => {
   }
 
   try {
-    const report = spyOnPlanet(playerId, targetPlanetId, probeCount, espionageLevel ?? 0);
+    const report = spyOnPlanet(
+      playerId,
+      targetPlanetId,
+      probeCount,
+      espionageLevel ?? 0,
+      defenderEspionageLevel ?? 0,
+    );
     res.status(201).json({ report });
   } catch (error) {
     res.status(400).json({ error: error instanceof Error ? error.message : 'espionage failed' });
