@@ -24,15 +24,6 @@ void AAsterDominionHUD::BeginPlay()
     Super::BeginPlay();
     UE_LOG(LogTemp, Log, TEXT("AsterDominionHUD BeginPlay"));
 
-    if (StatusWidgetClass)
-    {
-        StatusWidget = CreateWidget<UPlanetStatusWidget>(GetOwningPlayerController(), StatusWidgetClass);
-        if (StatusWidget)
-        {
-            StatusWidget->AddToViewport();
-        }
-    }
-
     bool bRequested = false;
     if (UWorld* World = GetWorld())
     {
@@ -128,7 +119,72 @@ void AAsterDominionHUD::BeginPlay()
 void AAsterDominionHUD::DrawHUD()
 {
     Super::DrawHUD();
-    // The UMG status widget renders the dashboard; no raw canvas text needed.
+
+    if (!Canvas)
+    {
+        return;
+    }
+
+    const float X = 24.0f;
+    const float Y = 24.0f;
+    const float PanelWidth = 380.0f;
+    const float PanelHeight = 330.0f;
+    const float Padding = 16.0f;
+    const float LineHeight = 30.0f;
+
+    // Panel background
+    Canvas->K2_DrawBox(FVector2D(X, Y), FVector2D(PanelWidth, PanelHeight), 0.0f, FLinearColor(0.02f, 0.04f, 0.07f, 0.85f));
+
+    // Panel border (top accent line)
+    Canvas->K2_DrawBox(FVector2D(X, Y), FVector2D(PanelWidth, 3.0f), 0.0f, FLinearColor(0.28f, 0.78f, 1.0f, 1.0f));
+
+    UFont* Font = GEngine->GetMediumFont();
+    float TextY = Y + Padding;
+
+    auto DrawText = [&](const FString& Text, const FColor& Color, float Scale = 1.0f)
+    {
+        FCanvasTextItem TextItem(FVector2D(X + Padding, TextY), FText::FromString(Text), Font, Color);
+        TextItem.EnableShadow(FLinearColor::Black);
+        TextItem.Scale = FVector2D(Scale, Scale);
+        Canvas->DrawItem(TextItem);
+        TextY += LineHeight * Scale;
+    };
+
+    auto DrawRow = [&](const FString& Label, const FString& Value, const FLinearColor& IconColor)
+    {
+        Canvas->K2_DrawBox(FVector2D(X + Padding, TextY + 6.0f), FVector2D(12.0f, 12.0f), 0.0f, IconColor);
+        FCanvasTextItem TextItem(FVector2D(X + Padding + 20.0f, TextY), FText::FromString(Label + TEXT(": ") + Value), Font, FColor(235, 235, 240, 255));
+        TextItem.EnableShadow(FLinearColor::Black);
+        Canvas->DrawItem(TextItem);
+        TextY += LineHeight;
+    };
+
+    DrawText(TEXT("ASTER DOMINION"), FColor(80, 215, 255, 255), 1.3f);
+    TextY += 4.0f;
+
+    if (!bHasDashboardData)
+    {
+        DrawText(TEXT("Cargando datos del imperio..."), FColor(200, 200, 200, 255));
+        return;
+    }
+
+    DrawText(CurrentDashboard.PlanetName, FColor(150, 220, 255, 255), 1.1f);
+    DrawText(CurrentDashboard.PlayerName, FColor(190, 190, 195, 255), 0.85f);
+    TextY += 6.0f;
+
+    DrawRow(TEXT("Metal"), FString::FromInt(CurrentDashboard.Resources.Metal), FLinearColor(0.75f, 0.75f, 0.78f, 1.0f));
+    DrawRow(TEXT("Cristal"), FString::FromInt(CurrentDashboard.Resources.Crystal), FLinearColor(0.4f, 0.8f, 1.0f, 1.0f));
+    DrawRow(TEXT("Deuterio"), FString::FromInt(CurrentDashboard.Resources.Deuterium), FLinearColor(0.4f, 1.0f, 0.59f, 1.0f));
+    DrawRow(TEXT("Energia"), FString::FromInt(CurrentDashboard.Resources.Energy), FLinearColor(1.0f, 0.84f, 0.31f, 1.0f));
+
+    TextY += 6.0f;
+    DrawText(FString::Printf(TEXT("Produccion: M+%d C+%d D+%d E+%d /h"),
+        CurrentDashboard.Production.Metal,
+        CurrentDashboard.Production.Crystal,
+        CurrentDashboard.Production.Deuterium,
+        CurrentDashboard.Production.Energy), FColor(180, 180, 190, 255), 0.85f);
+    DrawText(FString::Printf(TEXT("Naves: %d"), CurrentDashboard.TotalShips), FColor(230, 180, 100, 255), 0.9f);
+    DrawText(FString::Printf(TEXT("Fase: %s"), *CurrentDashboard.Phase), FColor(130, 150, 175, 255), 0.8f);
 }
 
 void AAsterDominionHUD::ApplyDashboard(const FPlanetHudData& Data)

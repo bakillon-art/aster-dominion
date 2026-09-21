@@ -3,9 +3,12 @@
 #include "Blueprint/WidgetTree.h"
 #include "Core/AsterDominionGameInstance.h"
 #include "Components/Border.h"
+#include "Components/CanvasPanel.h"
+#include "Components/CanvasPanelSlot.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/Image.h"
+#include "Components/SizeBox.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 #include "Styling/CoreStyle.h"
@@ -13,10 +16,12 @@
 void UPlanetStatusWidget::NativeConstruct()
 {
     Super::NativeConstruct();
+    UE_LOG(LogTemp, Log, TEXT("PlanetStatusWidget NativeConstruct, RootWidget=%s"), WidgetTree->RootWidget ? TEXT("yes") : TEXT("no"));
 
     if (!WidgetTree->RootWidget)
     {
         BuildLayout();
+        UE_LOG(LogTemp, Log, TEXT("PlanetStatusWidget BuildLayout done, RootWidget=%s"), WidgetTree->RootWidget ? TEXT("yes") : TEXT("no"));
     }
 
     SetData(CurrentData);
@@ -45,7 +50,14 @@ void UPlanetStatusWidget::BuildLayout()
     FleetText = CreateLabel(Box, TEXT("-"), FLinearColor(0.9f, 0.7f, 0.4f), 13);
     PhaseText = CreateLabel(Box, TEXT("-"), FLinearColor(0.5f, 0.6f, 0.7f), 11);
 
-    WidgetTree->RootWidget = Panel;
+    // Root canvas with a fixed-size slot so the panel always has geometry.
+    UCanvasPanel* RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
+    WidgetTree->RootWidget = RootCanvas;
+
+    UCanvasPanelSlot* PanelSlot = RootCanvas->AddChildToCanvas(Panel);
+    PanelSlot->SetAutoSize(false);
+    PanelSlot->SetSize(FVector2D(360.0f, 300.0f));
+    PanelSlot->SetPosition(FVector2D(0.0f, 0.0f));
 }
 
 UTextBlock* UPlanetStatusWidget::CreateLabel(UVerticalBox* Parent, const FString& Text, const FLinearColor& Color, int32 FontSize, bool bBold)
