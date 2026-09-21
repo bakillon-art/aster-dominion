@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import { gameStore } from '../data/store.js';
 import { getActiveQueueItems, processCompletedBuildings } from './buildQueueService.js';
+import { processArrivedMissions } from './missionService.js';
 import type { Planet, ResourceState } from '../types.js';
 
 const buildingCosts: Record<string, ResourceState> = {
@@ -212,6 +213,9 @@ export function getPlayerDashboardState(playerId: string) {
     }
   }
 
+  // Resolve any missions that have arrived.
+  const arrivedResults = processArrivedMissions(playerId);
+
   const currentPlanet = gameStore.planets.find((candidate) => candidate.id === snapshot.planet.id) ?? snapshot.planet;
 
   const planetFleets = gameStore.fleets.filter((fleet) => fleet.ownerId === playerId);
@@ -258,6 +262,7 @@ export function getPlayerDashboardState(playerId: string) {
       })),
     activeMissions,
     buildQueue,
+    recentEvents: arrivedResults,
     economy: {
       totalResources: snapshot.summary.totalResources,
       totalProduction: snapshot.summary.totalProduction,
