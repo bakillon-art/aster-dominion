@@ -128,52 +128,7 @@ void AAsterDominionHUD::BeginPlay()
 void AAsterDominionHUD::DrawHUD()
 {
     Super::DrawHUD();
-
-    if (!Canvas)
-    {
-        return;
-    }
-
-    const float X = 40.0f;
-    float Y = 40.0f;
-    const float LineHeight = 52.0f;
-    const float Scale = 1.6f;
-    const FLinearColor TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-    const FLinearColor TitleColor(0.3f, 0.85f, 1.0f, 1.0f);
-
-    UFont* Font = GEngine->GetLargeFont();
-
-    auto DrawLine = [&](const FString& Text, const FLinearColor& Color)
-    {
-        Canvas->SetDrawColor(Color.ToFColor(true));
-        FCanvasTextItem TextItem(FVector2D(X, Y), FText::FromString(Text), Font, FLinearColor::Black);
-        TextItem.EnableShadow(FLinearColor::Black);
-        TextItem.Scale = FVector2D(Scale, Scale);
-        Canvas->DrawItem(TextItem);
-        Y += LineHeight;
-    };
-
-    DrawLine(TEXT("ASTER DOMINION"), TitleColor);
-
-    if (!bHasDashboardData)
-    {
-        DrawLine(TEXT("Cargando datos del imperio..."), TextColor);
-        return;
-    }
-
-    DrawLine(FString::Printf(TEXT("Planeta: %s"), *CurrentDashboard.PlanetName), TitleColor);
-    DrawLine(FString::Printf(TEXT("Comandante: %s"), *CurrentDashboard.PlayerName), TextColor);
-    DrawLine(FString::Printf(TEXT("Metal: %d"), CurrentDashboard.Resources.Metal), TextColor);
-    DrawLine(FString::Printf(TEXT("Cristal: %d"), CurrentDashboard.Resources.Crystal), TextColor);
-    DrawLine(FString::Printf(TEXT("Deuterio: %d"), CurrentDashboard.Resources.Deuterium), TextColor);
-    DrawLine(FString::Printf(TEXT("Energia: %d"), CurrentDashboard.Resources.Energy), TextColor);
-    DrawLine(FString::Printf(TEXT("Produccion: M+%d C+%d D+%d E+%d /h"),
-        CurrentDashboard.Production.Metal,
-        CurrentDashboard.Production.Crystal,
-        CurrentDashboard.Production.Deuterium,
-        CurrentDashboard.Production.Energy), TextColor);
-    DrawLine(FString::Printf(TEXT("Naves: %d"), CurrentDashboard.TotalShips), TextColor);
-    DrawLine(FString::Printf(TEXT("Fase: %s"), *CurrentDashboard.Phase), TextColor);
+    // The UMG status widget renders the dashboard; no raw canvas text needed.
 }
 
 void AAsterDominionHUD::ApplyDashboard(const FPlanetHudData& Data)

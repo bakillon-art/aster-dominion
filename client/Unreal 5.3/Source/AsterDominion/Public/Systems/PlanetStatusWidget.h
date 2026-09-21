@@ -6,6 +6,11 @@
 #include "Systems/PlanetHudData.h"
 #include "PlanetStatusWidget.generated.h"
 
+class UVerticalBox;
+class UBorder;
+class UHorizontalBox;
+class UImage;
+
 UCLASS()
 class ASTERDOMINION_API UPlanetStatusWidget : public UUserWidget
 {
@@ -15,33 +20,6 @@ public:
     UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "AsterDominion")
     FPlanetHudData CurrentData;
 
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> PlanetNameText;
-
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> PlayerNameText;
-
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> MetalText;
-
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> CrystalText;
-
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> DeuteriumText;
-
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> EnergyText;
-
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> ProductionText;
-
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> FleetText;
-
-    UPROPERTY(meta = (BindWidget))
-    TObjectPtr<UTextBlock> PhaseText;
-
     virtual void NativeConstruct() override;
 
     UFUNCTION(BlueprintCallable, Category = "AsterDominion")
@@ -49,4 +27,39 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "AsterDominion")
     void RefreshFromBackend();
+
+private:
+    void BuildLayout();
+    UTextBlock* CreateLabel(UVerticalBox* Parent, const FString& Text, const FLinearColor& Color, int32 FontSize = 14, bool bBold = false);
+    void CreateResourceRow(UVerticalBox* Parent, const FString& Label, const FLinearColor& IconColor, TObjectPtr<UTextBlock>& OutValueText);
+
+    UPROPERTY()
+    TObjectPtr<UTextBlock> TitleText;
+
+    UPROPERTY()
+    TObjectPtr<UTextBlock> PlanetNameText;
+
+    UPROPERTY()
+    TObjectPtr<UTextBlock> PlayerNameText;
+
+    UPROPERTY()
+    TObjectPtr<UTextBlock> MetalText;
+
+    UPROPERTY()
+    TObjectPtr<UTextBlock> CrystalText;
+
+    UPROPERTY()
+    TObjectPtr<UTextBlock> DeuteriumText;
+
+    UPROPERTY()
+    TObjectPtr<UTextBlock> EnergyText;
+
+    UPROPERTY()
+    TObjectPtr<UTextBlock> ProductionText;
+
+    UPROPERTY()
+    TObjectPtr<UTextBlock> FleetText;
+
+    UPROPERTY()
+    TObjectPtr<UTextBlock> PhaseText;
 };
