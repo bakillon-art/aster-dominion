@@ -52,10 +52,10 @@ void AStarFieldActor::BeginPlay()
         Star->SetSimulatePhysics(false);
 
         const FVector Dir = FMath::VRand();
-        const float Dist = FieldRadius * FMath::FRandRange(0.6f, 1.0f);
+        const float Dist = FieldRadius * FMath::FRandRange(0.7f, 1.0f);
         Star->SetWorldLocation(Dir * Dist);
 
-        const float Scale = FMath::FRandRange(0.02f, 0.09f);
+        const float Scale = FMath::FRandRange(0.01f, 0.03f);
         Star->SetWorldScale3D(FVector(Scale));
 
         Star->RegisterComponent();
@@ -63,8 +63,8 @@ void AStarFieldActor::BeginPlay()
         UMaterialInstanceDynamic* StarMat = Star->CreateAndSetMaterialInstanceDynamic(0);
         if (StarMat)
         {
-            const float Brightness = FMath::FRandRange(0.7f, 1.0f);
-            StarMat->SetVectorParameterValue(TEXT("Color"), FLinearColor(Brightness, Brightness, Brightness, 1.0f));
+            const float Brightness = FMath::FRandRange(0.5f, 1.0f);
+            StarMat->SetVectorParameterValue(TEXT("Color"), FLinearColor(Brightness, Brightness, Brightness * 1.1f, 1.0f));
         }
     }
 }

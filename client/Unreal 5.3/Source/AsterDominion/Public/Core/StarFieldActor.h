@@ -18,7 +18,7 @@ public:
     int32 StarCount = 150;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stars")
-    float FieldRadius = 9000.0f;
+    float FieldRadius = 20000.0f;
 
 private:
     TObjectPtr<UStaticMesh> CachedSphereMesh;

@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 
+import { allianceRouter } from './routes/alliance.js';
 import { authRouter } from './routes/auth.js';
 import { combatRouter } from './routes/combat.js';
 import { defenseRouter } from './routes/defense.js';
@@ -32,6 +33,7 @@ export function createApp() {
   app.use('/defenses', defenseRouter);
   app.use('/galaxy', galaxyRouter);
   app.use('/trade', tradeRouter);
+  app.use('/alliances', allianceRouter);
 
   return app;
 }
