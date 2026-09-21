@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import { buildBuilding, createFleet, getDemoSnapshot, getPlayerDashboardState } from '../services/demoService.js';
 import { calculateOfflineProduction } from '../services/gameService.js';
+import { enqueueBuilding } from '../services/buildQueueService.js';
 import { gameStore } from '../data/store.js';
 
 export const demoRouter = Router();
@@ -63,11 +64,39 @@ demoRouter.post('/build', (req, res) => {
   }
 
   try {
+    // Pay the cost immediately, then enqueue the completion with a timer.
     const result = buildBuilding(planet, buildingType);
     const index = gameStore.planets.findIndex((candidate) => candidate.id === planet.id);
     gameStore.planets[index] = result.planet;
 
-    res.json({ building: result.building, planet: result.planet });
+    // Revert the immediate level registration; the queue applies it on completion.
+    const existing = gameStore.buildings.find(
+      (candidate) => candidate.planetId === planet.id && candidate.type === buildingType,
+    );
+    const queuedLevel = result.building.level;
+    if (existing && existing.level === queuedLevel) {
+      existing.level = queuedLevel - 1;
+      if (existing.level <= 0) {
+        const removeIndex = gameStore.buildings.findIndex(
+          (candidate) => candidate.planetId === planet.id && candidate.type === buildingType,
+        );
+        if (removeIndex >= 0) {
+          gameStore.buildings.splice(removeIndex, 1);
+        }
+      }
+    }
+
+    const queueItem = enqueueBuilding(planet, buildingType, queuedLevel);
+
+    res.json({
+      building: result.building,
+      planet: result.planet,
+      queue: {
+        id: queueItem.id,
+        completesAt: queueItem.completesAt,
+        durationSeconds: queueItem.durationSeconds,
+      },
+    });
   } catch (error) {
     res.status(400).json({ error: error instanceof Error ? error.message : 'build failed' });
   }

@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { gameStore } from '../data/store.js';
+import { getActiveQueueItems, processCompletedBuildings } from './buildQueueService.js';
 import type { Planet, ResourceState } from '../types.js';
 
 const buildingCosts: Record<string, ResourceState> = {
@@ -202,16 +203,23 @@ export function getDemoSnapshot(playerId: string) {
 export function getPlayerDashboardState(playerId: string) {
   const snapshot = getDemoSnapshot(playerId);
 
+  // Process any completed buildings and apply production boosts.
+  const processedPlanet = processCompletedBuildings(snapshot.planet);
+  if (processedPlanet !== snapshot.planet) {
+    const index = gameStore.planets.findIndex((candidate) => candidate.id === snapshot.planet.id);
+    if (index >= 0) {
+      gameStore.planets[index] = processedPlanet;
+    }
+  }
+
+  const currentPlanet = gameStore.planets.find((candidate) => candidate.id === snapshot.planet.id) ?? snapshot.planet;
+
   const planetFleets = gameStore.fleets.filter((fleet) => fleet.ownerId === playerId);
   const totalShips = planetFleets.reduce((sum, fleet) => sum + fleet.quantity, 0);
   const shipTypeMap = new Map<string, number>();
   for (const fleet of planetFleets) {
     shipTypeMap.set(fleet.shipType, (shipTypeMap.get(fleet.shipType) ?? 0) + fleet.quantity);
   }
-
-  const planetBuildings = gameStore.buildings.filter(
-    (building) => building.planetId === snapshot.planet.id,
-  );
 
   const now = Date.now();
   const activeMissions = gameStore.missions
@@ -225,20 +233,31 @@ export function getPlayerDashboardState(playerId: string) {
       arrivesAt: mission.arrivesAt,
     }));
 
+  const buildQueue = getActiveQueueItems(currentPlanet.id).map((item) => ({
+    id: item.id,
+    type: item.type,
+    key: item.key,
+    level: item.level,
+    secondsRemaining: Math.max(0, Math.round((new Date(item.completesAt).getTime() - now) / 1000)),
+  }));
+
   return {
     player: snapshot.player,
-    planet: snapshot.planet,
-    resources: snapshot.resources,
-    production: snapshot.production,
+    planet: currentPlanet,
+    resources: currentPlanet.resources,
+    production: currentPlanet.production,
     fleetSummary: {
       totalShips,
       shipTypes: Array.from(shipTypeMap.entries()).map(([type, quantity]) => ({ type, quantity })),
     },
-    buildings: planetBuildings.map((building) => ({
-      type: building.type,
-      level: building.level,
-    })),
+    buildings: gameStore.buildings
+      .filter((building) => building.planetId === currentPlanet.id)
+      .map((building) => ({
+        type: building.type,
+        level: building.level,
+      })),
     activeMissions,
+    buildQueue,
     economy: {
       totalResources: snapshot.summary.totalResources,
       totalProduction: snapshot.summary.totalProduction,
