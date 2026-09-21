@@ -45,9 +45,11 @@ public:
 private:
     TArray<FHudButton> ActionButtons;
     bool bButtonsBuilt = false;
+    FTimerHandle RefreshTimer;
     void BuildActionButtons();
     void DrawButton(const FHudButton& Button, const FVector2D& MousePos, bool bHovered);
     void HandleClick(const FVector2D& MousePos);
     void SendAction(const FString& Endpoint, const FString& JsonBody);
     void RefreshDashboard();
+    void SyncProductionAndRefresh();
 };

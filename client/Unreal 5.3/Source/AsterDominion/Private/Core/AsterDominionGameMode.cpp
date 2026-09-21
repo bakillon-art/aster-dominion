@@ -4,6 +4,7 @@
 #include "Core/AsterDominionPlayerController.h"
 #include "Core/PlanetActor.h"
 #include "Core/PlanetCameraPawn.h"
+#include "Core/StarFieldActor.h"
 #include "Kismet/GameplayStatics.h"
 
 AAsterDominionGameMode::AAsterDominionGameMode()
@@ -18,6 +19,11 @@ AAsterDominionGameMode::AAsterDominionGameMode()
 void AAsterDominionGameMode::BeginPlay()
 {
     Super::BeginPlay();
+
+    // Spawn a star field around the scene.
+    FActorSpawnParameters StarParams;
+    StarParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    GetWorld()->SpawnActor<AStarFieldActor>(AStarFieldActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, StarParams);
 
     if (PlanetActorClass)
     {

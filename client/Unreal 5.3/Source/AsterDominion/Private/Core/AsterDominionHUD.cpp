@@ -114,6 +114,31 @@ void AAsterDominionHUD::BeginPlay()
             });
         Request->ProcessRequest();
     }
+
+    // Auto-refresh: sync offline production and reload dashboard every 5 seconds.
+    if (UWorld* World = GetWorld())
+    {
+        World->GetTimerManager().SetTimer(
+            RefreshTimer, this, &AAsterDominionHUD::SyncProductionAndRefresh, 5.0f, true, 5.0f);
+    }
+}
+
+void AAsterDominionHUD::SyncProductionAndRefresh()
+{
+    const FString Url = TEXT("http://localhost:3001/demo/sync-production/player-demo");
+    TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = FHttpModule::Get().CreateRequest();
+    Request->SetVerb(TEXT("POST"));
+    Request->SetURL(Url);
+    Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+    Request->OnProcessRequestComplete().BindLambda(
+        [this](FHttpRequestPtr, FHttpResponsePtr Response, bool bWasSuccessful)
+        {
+            if (bWasSuccessful && Response.IsValid() && Response->GetResponseCode() == 200)
+            {
+                RefreshDashboard();
+            }
+        });
+    Request->ProcessRequest();
 }
 
 void AAsterDominionHUD::DrawHUD()

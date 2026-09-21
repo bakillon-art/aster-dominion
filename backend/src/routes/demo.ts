@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { buildBuilding, createFleet, getDemoSnapshot, getPlayerDashboardState } from '../services/demoService.js';
+import { calculateOfflineProduction } from '../services/gameService.js';
 import { gameStore } from '../data/store.js';
 
 export const demoRouter = Router();
@@ -24,6 +25,26 @@ demoRouter.get('/dashboard/:playerId', (req, res) => {
   } catch (error) {
     res.status(404).json({ error: error instanceof Error ? error.message : 'dashboard unavailable' });
   }
+});
+
+demoRouter.post('/sync-production/:playerId', (req, res) => {
+  const { playerId } = req.params;
+  const planet = gameStore.planets.find((candidate) => candidate.ownerId === playerId);
+
+  if (!planet) {
+    res.status(404).json({ error: 'planet not found for player' });
+    return;
+  }
+
+  const result = calculateOfflineProduction(planet, new Date());
+  const planetIndex = gameStore.planets.findIndex((candidate) => candidate.id === planet.id);
+  gameStore.planets[planetIndex] = result.updatedPlanet;
+
+  res.json({
+    gained: result.gained,
+    totalHours: result.totalHours,
+    planet: result.updatedPlanet,
+  });
 });
 
 demoRouter.post('/build', (req, res) => {
