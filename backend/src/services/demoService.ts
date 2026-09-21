@@ -7,10 +7,18 @@ import { getUnreadCount } from './messageService.js';
 import type { Planet, ResourceState } from '../types.js';
 
 const buildingCosts: Record<string, ResourceState> = {
-  mineral_extractor: { metal: 200, crystal: 130, deuterium: 0, energy: 0 },
-  crystal_refinery: { metal: 180, crystal: 150, deuterium: 0, energy: 0 },
-  deuterium_plant: { metal: 250, crystal: 160, deuterium: 20, energy: 0 },
-  solar_plant: { metal: 120, crystal: 80, deuterium: 0, energy: 0 },
+  mineral_extractor: { metal: 60, crystal: 15, deuterium: 0, energy: 0 },
+  crystal_refinery: { metal: 48, crystal: 24, deuterium: 0, energy: 0 },
+  deuterium_plant: { metal: 225, crystal: 75, deuterium: 0, energy: 0 },
+  solar_plant: { metal: 75, crystal: 30, deuterium: 0, energy: 0 },
+};
+
+// Base hourly production per level-1 building; each level multiplies output.
+const buildingProductionBase: Record<string, number> = {
+  mineral_extractor: 22,
+  crystal_refinery: 15,
+  deuterium_plant: 8,
+  solar_plant: 12,
 };
 
 const fleetCosts: Record<string, ResourceState> = {
@@ -25,18 +33,19 @@ export function buildBuilding(planet: Planet, type: string) {
   );
   const nextLevel = (existing?.level ?? 0) + 1;
 
-  // Cost scales with level (x1.6 per level).
+  // Cost scales with level (x1.8 per level, OGame-style).
   const cost = buildingCosts[type];
 
   if (!cost) {
     throw new Error(`Unknown building type: ${type}`);
   }
 
+  const levelFactor = Math.pow(1.8, existing?.level ?? 0);
   const scaledCost: ResourceState = {
-    metal: Math.floor(cost.metal * Math.pow(1.6, existing?.level ?? 0)),
-    crystal: Math.floor(cost.crystal * Math.pow(1.6, existing?.level ?? 0)),
-    deuterium: Math.floor(cost.deuterium * Math.pow(1.6, existing?.level ?? 0)),
-    energy: Math.floor(cost.energy * Math.pow(1.6, existing?.level ?? 0)),
+    metal: Math.floor(cost.metal * levelFactor),
+    crystal: Math.floor(cost.crystal * levelFactor),
+    deuterium: Math.floor(cost.deuterium * levelFactor),
+    energy: Math.floor(cost.energy * levelFactor),
   };
 
   if (
@@ -64,7 +73,7 @@ export function buildBuilding(planet: Planet, type: string) {
     gameStore.buildings.push({ planetId: planet.id, type, level: nextLevel });
   }
 
-  // Each mine/refinery level boosts production.
+  // Each level multiplies production modestly (OGame-style): recovery takes days.
   const productionBoost: Record<string, keyof ResourceState> = {
     mineral_extractor: 'metal',
     crystal_refinery: 'crystal',
@@ -73,9 +82,10 @@ export function buildBuilding(planet: Planet, type: string) {
   };
   const boostedResource = productionBoost[type];
   if (boostedResource) {
+    const base = buildingProductionBase[type] ?? 10;
     updatedPlanet.production = {
       ...updatedPlanet.production,
-      [boostedResource]: Math.floor(updatedPlanet.production[boostedResource] * 1.1) + 2,
+      [boostedResource]: Math.floor(updatedPlanet.production[boostedResource] + base * Math.pow(1.12, nextLevel - 1)),
     };
   }
 

@@ -4,6 +4,7 @@ import { gameStore } from '../data/store.js';
 import {
   canAffordResearch,
   getResearchCost,
+  getResearchDurationSeconds,
   researchTechnology,
   technologyCatalog,
   type TechnologyKey,
@@ -31,6 +32,7 @@ researchRouter.get('/:playerId', (req, res) => {
   const techs = Object.values(technologyCatalog).map((tech) => {
     const level = getPlayerTechLevel(playerId, tech.key);
     const nextCost = getResearchCost(tech.key, level);
+    const durationSeconds = getResearchDurationSeconds(tech.key, level);
 
     return {
       key: tech.key,
@@ -39,6 +41,7 @@ researchRouter.get('/:playerId', (req, res) => {
       category: tech.category,
       level,
       nextLevelCost: nextCost,
+      durationSeconds,
     };
   });
 

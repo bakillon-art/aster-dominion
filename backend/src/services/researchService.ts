@@ -148,6 +148,12 @@ export function getResearchCost(techKey: TechnologyKey, currentLevel: number): R
   };
 }
 
+// Research duration in seconds; grows x2 per level (OGame-style slow curve).
+export function getResearchDurationSeconds(techKey: TechnologyKey, currentLevel: number): number {
+  const baseSeconds = 300;
+  return Math.round(baseSeconds * Math.pow(2, currentLevel));
+}
+
 export function canAffordResearch(planet: Planet, techKey: TechnologyKey, currentLevel: number): boolean {
   const cost = getResearchCost(techKey, currentLevel);
 

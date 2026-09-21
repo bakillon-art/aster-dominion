@@ -18,10 +18,10 @@ export interface QueueItem {
 const buildQueues = new Map<string, QueueItem[]>();
 
 const buildingBaseDuration: Record<string, number> = {
-  mineral_extractor: 60,
-  crystal_refinery: 72,
-  deuterium_plant: 90,
-  solar_plant: 48,
+  mineral_extractor: 120,
+  crystal_refinery: 150,
+  deuterium_plant: 210,
+  solar_plant: 90,
 };
 
 export function getQueueForPlanet(planetId: string): QueueItem[] {
@@ -51,8 +51,8 @@ export function clearCompletedItems(planetId: string): void {
 }
 
 export function enqueueBuilding(planet: Planet, buildingType: string, level: number): QueueItem {
-  const baseDuration = buildingBaseDuration[buildingType] ?? 60;
-  const durationSeconds = Math.round(baseDuration * Math.pow(1.4, level - 1));
+  const baseDuration = buildingBaseDuration[buildingType] ?? 120;
+  const durationSeconds = Math.round(baseDuration * Math.pow(1.7, level - 1));
 
   const item: QueueItem = {
     id: `queue-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -92,11 +92,18 @@ export function processCompletedBuildings(planet: Planet): Planet {
       };
       const boosted = productionBoost[item.key];
       if (boosted) {
+        const productionBase: Record<string, number> = {
+          mineral_extractor: 22,
+          crystal_refinery: 15,
+          deuterium_plant: 8,
+          solar_plant: 12,
+        };
+        const base = productionBase[item.key] ?? 10;
         updated = {
           ...updated,
           production: {
             ...updated.production,
-            [boosted]: Math.floor(updated.production[boosted] * 1.1) + 2,
+            [boosted]: Math.floor(updated.production[boosted] + base * Math.pow(1.12, item.level - 1)),
           },
         };
       }

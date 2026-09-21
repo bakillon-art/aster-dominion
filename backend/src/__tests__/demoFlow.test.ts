@@ -28,8 +28,8 @@ test('buildBuilding consumes resources and increments level', () => {
   const result = buildBuilding(planet, 'mineral_extractor');
 
   assert.equal(result.building.level, 1);
-  assert.equal(result.planet.resources.metal, 5800);
-  assert.equal(result.planet.resources.crystal, 2870);
+  assert.equal(result.planet.resources.metal, 5940);
+  assert.equal(result.planet.resources.crystal, 2985);
   assert.equal(result.planet.resources.energy, 300);
 });
 
