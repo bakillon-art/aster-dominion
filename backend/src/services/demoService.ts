@@ -33,14 +33,14 @@ export function buildBuilding(planet: Planet, type: string) {
   );
   const nextLevel = (existing?.level ?? 0) + 1;
 
-  // Cost scales with level (x1.8 per level, OGame-style).
+  // Cost scales with level (x1.5 per level, allows long-term progression to high levels).
   const cost = buildingCosts[type];
 
   if (!cost) {
     throw new Error(`Unknown building type: ${type}`);
   }
 
-  const levelFactor = Math.pow(1.8, existing?.level ?? 0);
+  const levelFactor = Math.pow(1.5, existing?.level ?? 0);
   const scaledCost: ResourceState = {
     metal: Math.floor(cost.metal * levelFactor),
     crystal: Math.floor(cost.crystal * levelFactor),

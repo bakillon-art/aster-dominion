@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import { gameStore } from '../data/store.js';
+import { registerTechLevelLookup } from '../services/prerequisiteService.js';
 import {
   canAffordResearch,
   getResearchCost,
@@ -25,6 +26,9 @@ function setPlayerTechLevel(playerId: string, techKey: string, level: number): v
   }
   playerTechnologies.get(playerId)!.set(techKey, level);
 }
+
+// Let the prerequisite service query tech levels.
+registerTechLevelLookup(getPlayerTechLevel);
 
 researchRouter.get('/:playerId', (req, res) => {
   const { playerId } = req.params;

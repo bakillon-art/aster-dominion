@@ -11,6 +11,7 @@ import { fleetRouter } from './routes/fleet.js';
 import { galaxyRouter } from './routes/galaxy.js';
 import { healthRouter } from './routes/health.js';
 import { messageRouter } from './routes/messages.js';
+import { moonRouter } from './routes/moon.js';
 import { playerRouter } from './routes/player.js';
 import { researchRouter } from './routes/research.js';
 import { tradeRouter } from './routes/trade.js';
@@ -38,6 +39,7 @@ export function createApp() {
   app.use('/alliances', allianceRouter);
   app.use('/messages', messageRouter);
   app.use('/espionage', espionageRouter);
+  app.use('/moons', moonRouter);
 
   return app;
 }
