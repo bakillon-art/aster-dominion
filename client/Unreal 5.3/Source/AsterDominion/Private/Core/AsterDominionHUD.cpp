@@ -136,14 +136,16 @@ void AAsterDominionHUD::DrawHUD()
 
     const float X = 40.0f;
     float Y = 40.0f;
-    const float LineHeight = 34.0f;
-    const FLinearColor TextColor(0.9f, 0.95f, 1.0f, 1.0f);
-    const FLinearColor TitleColor(0.4f, 0.8f, 1.0f, 1.0f);
+    const float LineHeight = 44.0f;
+    const FLinearColor TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+    const FLinearColor TitleColor(0.3f, 0.85f, 1.0f, 1.0f);
+
+    UFont* Font = GEngine->GetLargeFont();
 
     auto DrawLine = [&](const FString& Text, const FLinearColor& Color)
     {
         Canvas->SetDrawColor(Color.ToFColor(true));
-        FCanvasTextItem TextItem(FVector2D(X, Y), FText::FromString(Text), GEngine->GetMediumFont(), FLinearColor::Black);
+        FCanvasTextItem TextItem(FVector2D(X, Y), FText::FromString(Text), Font, FLinearColor::Black);
         TextItem.EnableShadow(FLinearColor::Black);
         Canvas->DrawItem(TextItem);
         Y += LineHeight;
