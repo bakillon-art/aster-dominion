@@ -6,6 +6,7 @@ import { authRouter } from './routes/auth.js';
 import { combatRouter } from './routes/combat.js';
 import { defenseRouter } from './routes/defense.js';
 import { demoRouter } from './routes/demo.js';
+import { espionageRouter } from './routes/espionage.js';
 import { fleetRouter } from './routes/fleet.js';
 import { galaxyRouter } from './routes/galaxy.js';
 import { healthRouter } from './routes/health.js';
@@ -36,6 +37,7 @@ export function createApp() {
   app.use('/trade', tradeRouter);
   app.use('/alliances', allianceRouter);
   app.use('/messages', messageRouter);
+  app.use('/espionage', espionageRouter);
 
   return app;
 }
