@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { buildBuilding, createFleet, getDemoSnapshot, getPlayerDashboardState } from '../services/demoService.js';
 import { calculateOfflineProduction } from '../services/gameService.js';
 import { enqueueBuilding } from '../services/buildQueueService.js';
+import { checkPrerequisites } from '../services/prerequisiteService.js';
 import { gameStore } from '../data/store.js';
 
 export const demoRouter = Router();
@@ -64,6 +65,16 @@ demoRouter.post('/build', (req, res) => {
   }
 
   try {
+    // Enforce the prerequisite tree (OGame-style).
+    const prereq = checkPrerequisites(buildingType, planet.id, playerId);
+    if (!prereq.met) {
+      res.status(400).json({
+        error: 'missing prerequisites',
+        missing: prereq.missing,
+      });
+      return;
+    }
+
     // Pay the cost immediately, then enqueue the completion with a timer.
     const result = buildBuilding(planet, buildingType);
     const index = gameStore.planets.findIndex((candidate) => candidate.id === planet.id);

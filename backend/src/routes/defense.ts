@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 import { gameStore } from '../data/store.js';
 import { buildDefense, defenseCatalog, type DefenseType } from '../services/defenseService.js';
+import { checkPrerequisites } from '../services/prerequisiteService.js';
 
 export const defenseRouter = Router();
 
@@ -68,6 +69,13 @@ defenseRouter.post('/build', (req, res) => {
   }
 
   try {
+    // Enforce the prerequisite tree.
+    const prereq = checkPrerequisites(defenseType, planet.id, playerId);
+    if (!prereq.met) {
+      res.status(400).json({ error: 'missing prerequisites', missing: prereq.missing });
+      return;
+    }
+
     const result = buildDefense(planet, defenseType, quantity);
     const index = gameStore.planets.findIndex((candidate) => candidate.id === planet.id);
     gameStore.planets[index] = result.planet;

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { gameStore } from '../data/store.js';
-import { registerTechLevelLookup } from '../services/prerequisiteService.js';
+import { checkPrerequisites, registerTechLevelLookup } from '../services/prerequisiteService.js';
 import {
   canAffordResearch,
   getResearchCost,
@@ -68,6 +68,13 @@ researchRouter.post('/:playerId/research/:techKey', (req, res) => {
   }
 
   const currentLevel = getPlayerTechLevel(playerId, techKey);
+
+  // Enforce the prerequisite tree.
+  const prereq = checkPrerequisites(techKey, planet.id, playerId);
+  if (!prereq.met) {
+    res.status(400).json({ error: 'missing prerequisites', missing: prereq.missing });
+    return;
+  }
 
   if (!canAffordResearch(planet, techKey as TechnologyKey, currentLevel)) {
     res.status(400).json({ error: 'insufficient resources for research' });
