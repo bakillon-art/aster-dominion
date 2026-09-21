@@ -30,12 +30,19 @@ export interface StoredMission {
   arrivesAt: string;
 }
 
+export interface StoredDefense {
+  planetId: string;
+  type: string;
+  quantity: number;
+}
+
 export const gameStore = {
   players: [] as Player[],
   planets: [] as Planet[],
   fleets: [] as StoredFleet[],
   buildings: [] as StoredBuilding[],
   missions: [] as StoredMission[],
+  defenses: [] as StoredDefense[],
 };
 
 const defaultPlayerId = randomUUID();

@@ -245,6 +245,13 @@ export function getPlayerDashboardState(playerId: string) {
     secondsRemaining: Math.max(0, Math.round((new Date(item.completesAt).getTime() - now) / 1000)),
   }));
 
+  const defenseSummary = gameStore.defenses
+    .filter((defense) => defense.planetId === currentPlanet.id)
+    .map((defense) => ({ type: defense.type, quantity: defense.quantity }));
+  const totalDefenses = gameStore.defenses
+    .filter((defense) => defense.planetId === currentPlanet.id)
+    .reduce((sum, defense) => sum + defense.quantity, 0);
+
   return {
     player: snapshot.player,
     planet: currentPlanet,
@@ -263,6 +270,10 @@ export function getPlayerDashboardState(playerId: string) {
     activeMissions,
     buildQueue,
     recentEvents: arrivedResults,
+    defenses: {
+      total: totalDefenses,
+      items: defenseSummary,
+    },
     economy: {
       totalResources: snapshot.summary.totalResources,
       totalProduction: snapshot.summary.totalProduction,

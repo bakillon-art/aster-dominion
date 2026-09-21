@@ -5,19 +5,17 @@ import { buildDefense, defenseCatalog, type DefenseType } from '../services/defe
 
 export const defenseRouter = Router();
 
-// In-memory defense storage per planet
-const planetDefenses = new Map<string, Map<string, number>>();
-
 function getDefenseCount(planetId: string, type: string): number {
-  return planetDefenses.get(planetId)?.get(type) ?? 0;
+  return gameStore.defenses.find((d) => d.planetId === planetId && d.type === type)?.quantity ?? 0;
 }
 
 function addDefenses(planetId: string, type: string, quantity: number): void {
-  if (!planetDefenses.has(planetId)) {
-    planetDefenses.set(planetId, new Map());
+  const existing = gameStore.defenses.find((d) => d.planetId === planetId && d.type === type);
+  if (existing) {
+    existing.quantity += quantity;
+  } else {
+    gameStore.defenses.push({ planetId, type, quantity });
   }
-  const current = planetDefenses.get(planetId)!.get(type) ?? 0;
-  planetDefenses.get(planetId)!.set(type, current + quantity);
 }
 
 defenseRouter.get('/', (_req, res) => {
@@ -35,12 +33,11 @@ defenseRouter.get('/', (_req, res) => {
 
 defenseRouter.get('/planet/:planetId', (req, res) => {
   const { planetId } = req.params;
-  const defenses = planetDefenses.get(planetId);
 
   const result = Object.values(defenseCatalog).map((def) => ({
     type: def.key,
     name: def.name,
-    quantity: defenses?.get(def.key) ?? 0,
+    quantity: gameStore.defenses.find((d) => d.planetId === planetId && d.type === def.key)?.quantity ?? 0,
   }));
 
   res.json({ planetId, defenses: result });
