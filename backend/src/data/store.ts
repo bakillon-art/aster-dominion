@@ -2,9 +2,27 @@ import { randomUUID } from 'node:crypto';
 
 import type { Planet, Player } from '../types.js';
 
+export interface StoredFleet {
+  id: string;
+  planetId: string;
+  ownerId: string;
+  shipType: string;
+  quantity: number;
+  status: 'idle' | 'traveling' | 'returning';
+  createdAt: string;
+}
+
+export interface StoredBuilding {
+  planetId: string;
+  type: string;
+  level: number;
+}
+
 export const gameStore = {
   players: [] as Player[],
   planets: [] as Planet[],
+  fleets: [] as StoredFleet[],
+  buildings: [] as StoredBuilding[],
 };
 
 const defaultPlayerId = randomUUID();

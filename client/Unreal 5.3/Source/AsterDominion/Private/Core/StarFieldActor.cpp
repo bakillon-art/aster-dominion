@@ -8,21 +8,27 @@
 AStarFieldActor::AStarFieldActor()
 {
     PrimaryActorTick.bCanEverTick = false;
+
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereFinder(
+        TEXT("/Engine/BasicShapes/Sphere.Sphere"));
+    if (SphereFinder.Succeeded())
+    {
+        CachedSphereMesh = SphereFinder.Object;
+    }
+
+    static ConstructorHelpers::FObjectFinder<UMaterialInterface> MatFinder(
+        TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+    if (MatFinder.Succeeded())
+    {
+        CachedMaterial = MatFinder.Object;
+    }
 }
 
 void AStarFieldActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    UStaticMesh* SphereMesh = nullptr;
-    static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereFinder(
-        TEXT("/Engine/BasicShapes/Sphere.Sphere"));
-    if (SphereFinder.Succeeded())
-    {
-        SphereMesh = SphereFinder.Object;
-    }
-
-    if (!SphereMesh)
+    if (!CachedSphereMesh)
     {
         return;
     }
@@ -36,12 +42,15 @@ void AStarFieldActor::BeginPlay()
             continue;
         }
 
-        Star->SetStaticMesh(SphereMesh);
+        Star->SetStaticMesh(CachedSphereMesh);
+        if (CachedMaterial)
+        {
+            Star->SetMaterial(0, CachedMaterial);
+        }
         Star->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         Star->SetCastShadow(false);
         Star->SetSimulatePhysics(false);
 
-        // Random point on a sphere shell around the origin.
         const FVector Dir = FMath::VRand();
         const float Dist = FieldRadius * FMath::FRandRange(0.6f, 1.0f);
         Star->SetWorldLocation(Dir * Dist);

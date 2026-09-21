@@ -20,17 +20,23 @@ void AAsterDominionGameMode::BeginPlay()
 {
     Super::BeginPlay();
 
+    UWorld* World = GetWorld();
+    if (!World)
+    {
+        return;
+    }
+
     // Spawn a star field around the scene.
     FActorSpawnParameters StarParams;
     StarParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-    GetWorld()->SpawnActor<AStarFieldActor>(AStarFieldActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, StarParams);
+    World->SpawnActor<AStarFieldActor>(AStarFieldActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, StarParams);
 
     if (PlanetActorClass)
     {
         FActorSpawnParameters Params;
         Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-        APlanetActor* Planet = GetWorld()->SpawnActor<APlanetActor>(PlanetActorClass, FVector::ZeroVector, FRotator::ZeroRotator, Params);
+        APlanetActor* Planet = World->SpawnActor<APlanetActor>(PlanetActorClass, FVector::ZeroVector, FRotator::ZeroRotator, Params);
         if (Planet)
         {
             Planet->SetActorLocation(FVector(0.0f, 0.0f, 0.0f));
@@ -38,12 +44,9 @@ void AAsterDominionGameMode::BeginPlay()
         }
     }
 
-    if (GetWorld() && GetWorld()->GetFirstPlayerController())
+    APlayerController* Controller = World->GetFirstPlayerController();
+    if (Controller)
     {
-        APlayerController* Controller = GetWorld()->GetFirstPlayerController();
-        if (Controller)
-        {
-            Controller->SetInitialLocationAndRotation(FVector(0.0f, 0.0f, 0.0f), FRotator(0.0f, 0.0f, 0.0f));
-        }
+        Controller->SetInitialLocationAndRotation(FVector(0.0f, 0.0f, 0.0f), FRotator(0.0f, 0.0f, 0.0f));
     }
 }

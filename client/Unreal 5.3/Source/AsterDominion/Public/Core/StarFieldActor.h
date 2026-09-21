@@ -15,8 +15,12 @@ public:
     virtual void BeginPlay() override;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stars")
-    int32 StarCount = 400;
+    int32 StarCount = 150;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stars")
     float FieldRadius = 9000.0f;
+
+private:
+    TObjectPtr<UStaticMesh> CachedSphereMesh;
+    TObjectPtr<UMaterialInterface> CachedMaterial;
 };

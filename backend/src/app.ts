@@ -7,6 +7,7 @@ import { demoRouter } from './routes/demo.js';
 import { fleetRouter } from './routes/fleet.js';
 import { healthRouter } from './routes/health.js';
 import { playerRouter } from './routes/player.js';
+import { researchRouter } from './routes/research.js';
 
 export function createApp() {
   const app = express();
@@ -24,6 +25,7 @@ export function createApp() {
   app.use('/demo', demoRouter);
   app.use('/fleets', fleetRouter);
   app.use('/combat', combatRouter);
+  app.use('/research', researchRouter);
 
   return app;
 }

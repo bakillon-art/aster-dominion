@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto';
+
 import { gameStore } from '../data/store.js';
 import type { Planet, ResourceState } from '../types.js';
 
@@ -15,17 +17,30 @@ const fleetCosts: Record<string, ResourceState> = {
 };
 
 export function buildBuilding(planet: Planet, type: string) {
+  const existing = gameStore.buildings.find(
+    (candidate) => candidate.planetId === planet.id && candidate.type === type,
+  );
+  const nextLevel = (existing?.level ?? 0) + 1;
+
+  // Cost scales with level (x1.6 per level).
   const cost = buildingCosts[type];
 
   if (!cost) {
     throw new Error(`Unknown building type: ${type}`);
   }
 
+  const scaledCost: ResourceState = {
+    metal: Math.floor(cost.metal * Math.pow(1.6, existing?.level ?? 0)),
+    crystal: Math.floor(cost.crystal * Math.pow(1.6, existing?.level ?? 0)),
+    deuterium: Math.floor(cost.deuterium * Math.pow(1.6, existing?.level ?? 0)),
+    energy: Math.floor(cost.energy * Math.pow(1.6, existing?.level ?? 0)),
+  };
+
   if (
-    planet.resources.metal < cost.metal ||
-    planet.resources.crystal < cost.crystal ||
-    planet.resources.deuterium < cost.deuterium ||
-    planet.resources.energy < cost.energy
+    planet.resources.metal < scaledCost.metal ||
+    planet.resources.crystal < scaledCost.crystal ||
+    planet.resources.deuterium < scaledCost.deuterium ||
+    planet.resources.energy < scaledCost.energy
   ) {
     throw new Error(`Insufficient resources to build ${type}`);
   }
@@ -33,17 +48,38 @@ export function buildBuilding(planet: Planet, type: string) {
   const updatedPlanet: Planet = {
     ...planet,
     resources: {
-      metal: planet.resources.metal - cost.metal,
-      crystal: planet.resources.crystal - cost.crystal,
-      deuterium: planet.resources.deuterium - cost.deuterium,
-      energy: planet.resources.energy - cost.energy,
+      metal: planet.resources.metal - scaledCost.metal,
+      crystal: planet.resources.crystal - scaledCost.crystal,
+      deuterium: planet.resources.deuterium - scaledCost.deuterium,
+      energy: planet.resources.energy - scaledCost.energy,
     },
   };
+
+  if (existing) {
+    existing.level = nextLevel;
+  } else {
+    gameStore.buildings.push({ planetId: planet.id, type, level: nextLevel });
+  }
+
+  // Each mine/refinery level boosts production.
+  const productionBoost: Record<string, keyof ResourceState> = {
+    mineral_extractor: 'metal',
+    crystal_refinery: 'crystal',
+    deuterium_plant: 'deuterium',
+    solar_plant: 'energy',
+  };
+  const boostedResource = productionBoost[type];
+  if (boostedResource) {
+    updatedPlanet.production = {
+      ...updatedPlanet.production,
+      [boostedResource]: Math.floor(updatedPlanet.production[boostedResource] * 1.1) + 2,
+    };
+  }
 
   return {
     building: {
       type,
-      level: 1,
+      level: nextLevel,
     },
     planet: updatedPlanet,
   };
@@ -86,8 +122,20 @@ export function createFleet(planet: Planet, shipType: string, quantity: number) 
     },
   };
 
+  const storedFleet = {
+    id: randomUUID(),
+    planetId: planet.id,
+    ownerId: planet.ownerId,
+    shipType,
+    quantity,
+    status: 'idle' as const,
+    createdAt: new Date().toISOString(),
+  };
+  gameStore.fleets.push(storedFleet);
+
   return {
     fleet: {
+      id: storedFleet.id,
       shipType,
       quantity,
       status: 'idle',
@@ -154,15 +202,30 @@ export function getDemoSnapshot(playerId: string) {
 export function getPlayerDashboardState(playerId: string) {
   const snapshot = getDemoSnapshot(playerId);
 
+  const planetFleets = gameStore.fleets.filter((fleet) => fleet.ownerId === playerId);
+  const totalShips = planetFleets.reduce((sum, fleet) => sum + fleet.quantity, 0);
+  const shipTypeMap = new Map<string, number>();
+  for (const fleet of planetFleets) {
+    shipTypeMap.set(fleet.shipType, (shipTypeMap.get(fleet.shipType) ?? 0) + fleet.quantity);
+  }
+
+  const planetBuildings = gameStore.buildings.filter(
+    (building) => building.planetId === snapshot.planet.id,
+  );
+
   return {
     player: snapshot.player,
     planet: snapshot.planet,
     resources: snapshot.resources,
     production: snapshot.production,
     fleetSummary: {
-      totalShips: 0,
-      shipTypes: [],
+      totalShips,
+      shipTypes: Array.from(shipTypeMap.entries()).map(([type, quantity]) => ({ type, quantity })),
     },
+    buildings: planetBuildings.map((building) => ({
+      type: building.type,
+      level: building.level,
+    })),
     economy: {
       totalResources: snapshot.summary.totalResources,
       totalProduction: snapshot.summary.totalProduction,
